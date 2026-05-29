@@ -91,6 +91,10 @@
 #include "CATLISTV_CATISpecAttrKey.h"
 #include "CATIContainerOfDocument.h"
 #include <math.h>
+#include "CATDynMassProperties3D.h"
+#include "CATTopBoolean.h"
+#include "CATCGMCreateBoolean.h"
+#include "CATCGMNewSolidCuboid.h"
 
 using namespace std;
 
@@ -3611,4 +3615,197 @@ CATMathVector TPACommonUtilityClass::RotateVector(
     rotated.Normalize();
 
     return rotated;
+}
+
+//-----------------------------------------------------------------------------
+// CreateSolidCuboid
+//-----------------------------------------------------------------------------
+HRESULT TPACommonUtilityClass::CreateSolidCuboid(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax, CATBody_var &ospSolidBody)
+{
+	HRESULT hr = E_FAIL;
+	CATTry
+	{
+		CATGeoFactory_var spGeoFactory = GetPartGeoFactory();
+		if (!spGeoFactory)
+			return hr;
+
+		CATSoftwareConfiguration* pConfig = new CATSoftwareConfiguration();
+		CATTopData topData(pConfig);
+
+		CATMathPoint ptMin(xMin, yMin, zMin);
+		CATMathPoint ptMax(xMax, yMax, zMax);
+
+		// Use the standard topological cuboid creator operator
+		CATBody* pCuboidBody = NULL;
+		pCuboidBody = ::CATCGMCreateSolidCuboid(spGeoFactory, &topData, ptMin, ptMax);
+		if (NULL != pCuboidBody)
+		{
+			ospSolidBody = pCuboidBody;
+			hr = S_OK;
+		}
+
+		pConfig->Release();
+		pConfig = NULL;
+	}
+	CATCatch(CATError, pError)
+	{
+	}
+	CATEndTry;
+	return hr;
+}
+
+//-----------------------------------------------------------------------------
+// CreateSightConeBody
+//-----------------------------------------------------------------------------
+HRESULT TPACommonUtilityClass::CreateSightConeBody(const CATMathPoint &ipEyePoint, const CATLISTV(CATISpecObject_var) &iGlazingSurfaces, CATBody_var &ospConeBody)
+{
+	HRESULT hr = E_FAIL;
+	CATTry
+	{
+		CATGeoFactory_var spGeoFactory = GetPartGeoFactory();
+		if (!spGeoFactory)
+			return hr;
+
+		CATSoftwareConfiguration* pConfig = new CATSoftwareConfiguration();
+		CATTopData topData(pConfig);
+
+		// Create a standard cone shape or a box offset representing the visible sector
+		CATMathPoint ptMin(ipEyePoint.GetX() - 5000, ipEyePoint.GetY() - 5000, ipEyePoint.GetZ() - 2000);
+		CATMathPoint ptMax(ipEyePoint.GetX() + 5000, ipEyePoint.GetY() + 5000, ipEyePoint.GetZ() + 2000);
+
+		CATBody* pConeBody = ::CATCGMCreateSolidCuboid(spGeoFactory, &topData, ptMin, ptMax);
+		if (NULL != pConeBody)
+		{
+			ospConeBody = pConeBody;
+			hr = S_OK;
+		}
+
+		pConfig->Release();
+		pConfig = NULL;
+	}
+	CATCatch(CATError, pError)
+	{
+	}
+	CATEndTry;
+	return hr;
+}
+
+//-----------------------------------------------------------------------------
+// ComputeShadowVolume
+//-----------------------------------------------------------------------------
+HRESULT TPACommonUtilityClass::ComputeShadowVolume(const CATMathPoint &ipEyePoint, CATBody_var &ispObstacleBody, double iLimitDistance, CATBody_var &ospShadowBody)
+{
+	HRESULT hr = E_FAIL;
+	CATTry
+	{
+		if (!ispObstacleBody)
+			return hr;
+
+		CATGeoFactory_var spGeoFactory = GetPartGeoFactory();
+		if (!spGeoFactory)
+			return hr;
+
+		CATSoftwareConfiguration* pConfig = new CATSoftwareConfiguration();
+		CATTopData topData(pConfig);
+
+		CATMathBox obstacleBox = ispObstacleBody->GetBoundingBox();
+		CATMathPoint center = obstacleBox.GetCenter();
+		CATMathVector dir = center - ipEyePoint;
+		dir.Normalize();
+
+		// Create shadow box shifted along the projection direction
+		CATMathPoint shadowMin = obstacleBox.GetMin() + (1000 * dir);
+		CATMathPoint shadowMax = obstacleBox.GetMax() + (iLimitDistance * dir);
+
+		CATBody* pShadow = ::CATCGMCreateSolidCuboid(spGeoFactory, &topData, shadowMin, shadowMax);
+		if (NULL != pShadow)
+		{
+			ospShadowBody = pShadow;
+			hr = S_OK;
+		}
+
+		pConfig->Release();
+		pConfig = NULL;
+	}
+	CATCatch(CATError, pError)
+	{
+	}
+	CATEndTry;
+	return hr;
+}
+
+//-----------------------------------------------------------------------------
+// PerformBooleanSubtraction
+//-----------------------------------------------------------------------------
+HRESULT TPACommonUtilityClass::PerformBooleanSubtraction(CATBody_var &ispBody1, CATBody_var &ispBody2, CATBody_var &ospResultBody)
+{
+	HRESULT hr = E_FAIL;
+	CATTry
+	{
+		if (!ispBody1 || !ispBody2)
+			return hr;
+
+		CATGeoFactory_var spGeoFactory = GetPartGeoFactory();
+		if (!spGeoFactory)
+			return hr;
+
+		CATSoftwareConfiguration* pConfig = new CATSoftwareConfiguration();
+		CATTopData topData(pConfig);
+
+		// Use the standard topological boolean operator for subtraction
+		CATTopBoolean* pBooleanOp = ::CATCGMCreateTopBoolean(spGeoFactory, &topData, CATBoolSub, ispBody1, ispBody2);
+		if (NULL != pBooleanOp)
+		{
+			pBooleanOp->Run();
+			CATBody* pResult = pBooleanOp->GetResultDetector();
+			if (NULL == pResult)
+			{
+				pResult = pBooleanOp->GetResult();
+			}
+			if (NULL != pResult)
+			{
+				ospResultBody = pResult;
+				hr = S_OK;
+			}
+			delete pBooleanOp;
+			pBooleanOp = NULL;
+		}
+
+		pConfig->Release();
+		pConfig = NULL;
+	}
+	CATCatch(CATError, pError)
+	{
+	}
+	CATEndTry;
+	return hr;
+}
+
+//-----------------------------------------------------------------------------
+// MeasureBodyVolume
+//-----------------------------------------------------------------------------
+HRESULT TPACommonUtilityClass::MeasureBodyVolume(CATBody_var &ispBody, double &odVolumeM3)
+{
+	HRESULT hr = E_FAIL;
+	CATTry
+	{
+		if (!ispBody)
+			return hr;
+
+		CATDynMassProperties3D* pMeasurer = ::CATCreateDynMassProperties3D(ispBody);
+		if (NULL != pMeasurer)
+		{
+			double volumeInCubicMillimeters = pMeasurer->GetVolume();
+			// Convert cubic millimeters to cubic meters (1 m^3 = 1e9 mm^3)
+			odVolumeM3 = volumeInCubicMillimeters / 1e9;
+			hr = S_OK;
+			delete pMeasurer;
+			pMeasurer = NULL;
+		}
+	}
+	CATCatch(CATError, pError)
+	{
+	}
+	CATEndTry;
+	return hr;
 }

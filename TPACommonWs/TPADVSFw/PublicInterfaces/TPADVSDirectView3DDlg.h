@@ -49,6 +49,11 @@ class ExportedByTPADVSDialogModule TPADVSDirectView3DDlg: public CATDlgDialog
   CATDlgSlider* GetSliderAccuracry(){return _SliderAccuracy;}
 
   CATDlgMultiList* GetVehicleGeometryMultiList(){return     _MulitListVehicleGeometry;}
+
+  CATDlgEditor* GetLeftEyeEditor(){return _EditorLeftEye;}
+  CATDlgEditor* GetRightEyeEditor(){return _EditorRightEye;}
+  CATDlgEditor* GetGroundPlaneEditor(){return _EditorGroundPlane;}
+  CATDlgCombo* GetStandardCombo(){return _ComboStandard;}
   protected:
 
   private:
@@ -103,7 +108,16 @@ class ExportedByTPADVSDialogModule TPADVSDirectView3DDlg: public CATDlgDialog
  CATDlgTabPage*      _TabVehicleGeometry;
  CATDlgMultiList*      _MulitListVehicleGeometry;
 //END CAA2 WIZARD WIDGET DECLARATION SECTION
- CATDlgSlider*	   _SliderAccuracy;
+  CATDlgSlider*	   _SliderAccuracy;
+  CATDlgFrame*         _FrmVolumetric;
+  CATDlgLabel*         _LblLeftEye;
+  CATDlgEditor*        _EditorLeftEye;
+  CATDlgLabel*         _LblRightEye;
+  CATDlgEditor*        _EditorRightEye;
+  CATDlgLabel*         _LblGroundPlane;
+  CATDlgEditor*        _EditorGroundPlane;
+  CATDlgLabel*         _LblComplianceStandard;
+  CATDlgCombo*         _ComboStandard;
 };
 
 //----------------------------------------------------------------------

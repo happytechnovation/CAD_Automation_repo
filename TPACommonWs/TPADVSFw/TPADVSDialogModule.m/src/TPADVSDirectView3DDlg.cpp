@@ -85,6 +85,15 @@ TPADVSDirectView3DDlg::TPADVSDirectView3DDlg() :
  _MulitListVehicleGeometry = NULL;
 //END CAA2 WIZARD CONSTRUCTOR INITIALIZATION SECTION
  _SliderAccuracy = NULL;
+  _FrmVolumetric = NULL;
+  _LblLeftEye = NULL;
+  _EditorLeftEye = NULL;
+  _LblRightEye = NULL;
+  _EditorRightEye = NULL;
+  _LblGroundPlane = NULL;
+  _EditorGroundPlane = NULL;
+  _LblComplianceStandard = NULL;
+  _ComboStandard = NULL;
 }
 
 //-------------------------------------------------------------------------
@@ -145,6 +154,15 @@ TPADVSDirectView3DDlg::~TPADVSDirectView3DDlg()
  _MulitListVehicleGeometry = NULL;
 //END CAA2 WIZARD DESTRUCTOR DECLARATION SECTION
  _SliderAccuracy = NULL;
+  _FrmVolumetric = NULL;
+  _LblLeftEye = NULL;
+  _EditorLeftEye = NULL;
+  _LblRightEye = NULL;
+  _EditorRightEye = NULL;
+  _LblGroundPlane = NULL;
+  _EditorGroundPlane = NULL;
+  _LblComplianceStandard = NULL;
+  _ComboStandard = NULL;
 }
 
 
@@ -280,6 +298,37 @@ _SliderAccuracy->SetGridConstraints(0, 2, 1, 1, CATGRID_4SIDES);
 _SliderAccuracy->SetCurrentValue((float)0.1, 0);
 _SpinnerRange->SetValue(90, 0);
 _SliderAccuracy->SetDecimalPoint(2);
+
+// Volumetric DVS additions
+_FrmVolumetric = new CATDlgFrame(this, "FrmVolumetric", CATDlgGridLayout);
+_FrmVolumetric->SetGridConstraints(3, 0, 1, 1, CATGRID_4SIDES);
+
+_LblLeftEye = new CATDlgLabel(_FrmVolumetric, "LblLeftEye");
+_LblLeftEye->SetGridConstraints(0, 0, 1, 1, CATGRID_4SIDES);
+_EditorLeftEye = new CATDlgEditor(_FrmVolumetric, "EditorLeftEye");
+_EditorLeftEye->SetGridConstraints(0, 1, 1, 1, CATGRID_4SIDES);
+_EditorLeftEye->SetReadOnly(TRUE);
+
+_LblRightEye = new CATDlgLabel(_FrmVolumetric, "LblRightEye");
+_LblRightEye->SetGridConstraints(1, 0, 1, 1, CATGRID_4SIDES);
+_EditorRightEye = new CATDlgEditor(_FrmVolumetric, "EditorRightEye");
+_EditorRightEye->SetGridConstraints(1, 1, 1, 1, CATGRID_4SIDES);
+_EditorRightEye->SetReadOnly(TRUE);
+
+_LblGroundPlane = new CATDlgLabel(_FrmVolumetric, "LblGroundPlane");
+_LblGroundPlane->SetGridConstraints(2, 0, 1, 1, CATGRID_4SIDES);
+_EditorGroundPlane = new CATDlgEditor(_FrmVolumetric, "EditorGroundPlane");
+_EditorGroundPlane->SetGridConstraints(2, 1, 1, 1, CATGRID_4SIDES);
+_EditorGroundPlane->SetReadOnly(TRUE);
+
+_LblComplianceStandard = new CATDlgLabel(_FrmVolumetric, "LblComplianceStandard");
+_LblComplianceStandard->SetGridConstraints(3, 0, 1, 1, CATGRID_4SIDES);
+_ComboStandard = new CATDlgCombo(_FrmVolumetric, "ComboStandard", CATDlgCmbDropDown);
+_ComboStandard->SetGridConstraints(3, 1, 1, 1, CATGRID_4SIDES);
+_ComboStandard->SetLine("London DVS (TfL)", 0);
+_ComboStandard->SetLine("Custom / Free", 1);
+_ComboStandard->SelectLine(0);
+
 _FrmDefinition->SetSensitivity(CATDlgDisable);
 _FrmTargetSurface->SetSensitivity(CATDlgDisable);
 _FrmSelSurface->SetSensitivity(CATDlgDisable);

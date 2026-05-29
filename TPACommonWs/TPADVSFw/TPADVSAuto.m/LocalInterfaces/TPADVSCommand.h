@@ -28,6 +28,7 @@
 #include "CATPathElementAgent.h"
 #include "CATHSO.h"
 #include "CATPSO.h"
+#include "ListPOfCATBody.h"
 
 
 
@@ -77,6 +78,9 @@ class TPADVSCommand: public CATStateCommand
   virtual CATBoolean ActionOnVechGeomMultiListRemove();
   virtual CATBoolean ActionOnVehicleGeomMultiList();
 
+  public:
+	  virtual CATBoolean ActionOnComputeVolumetricDVS();
+
   private:
 	  TPACommonUtilityClass *_pTPACommonUtiliy;
 	  CATViewer				*_pViewer;
@@ -88,6 +92,11 @@ class TPADVSCommand: public CATStateCommand
 	  CATHSO				*_pHSO;
 	  CATPSO				*_pPSO;
 
+	  CATISpecObject_var    _spLeftEyePoint;
+	  CATISpecObject_var    _spRightEyePoint;
+	  CATISpecObject_var    _spGroundPlane;
+	  CATLISTV(CATISpecObject_var) _ListOfObstacleBodies;
+	  CATLISTP(CATBody)     _transientCGMBodies;
 };
 
 //----------------------------------------------------------------------

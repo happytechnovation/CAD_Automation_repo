@@ -183,6 +183,17 @@ public:
     const CATMathVector& vec,
     const CATMathVector& axis,
     double angleDeg);
+
+	HRESULT CreateSolidCuboid(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax, CATBody_var &ospSolidBody);
+
+	HRESULT CreateSightConeBody(const CATMathPoint &ipEyePoint, const CATLISTV(CATISpecObject_var) &iGlazingSurfaces, CATBody_var &ospConeBody);
+
+	HRESULT ComputeShadowVolume(const CATMathPoint &ipEyePoint, CATBody_var &ispObstacleBody, double iLimitDistance, CATBody_var &ospShadowBody);
+
+	HRESULT PerformBooleanSubtraction(CATBody_var &ispBody1, CATBody_var &ispBody2, CATBody_var &ospResultBody);
+
+	HRESULT MeasureBodyVolume(CATBody_var &ispBody, double &odVolumeM3);
+
   // Copy constructor and equal operator
   // -----------------------------------
   TPACommonUtilityClass (TPACommonUtilityClass &);

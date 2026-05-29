@@ -23,7 +23,9 @@
 #include "CATLine.h"
 #include "CATI3DGeoVisu.h"
 #include "CATRep.h"
+#include "CAT3DLineRep.h"
 #include "CATListOfCATString.h"
+#include "TPAVolumetricDVSEngine.h"
 #include "CATISpecObject.h"
 #include "CATFrmEditor.h"
 #include "ListPOfCATBody.h"
@@ -51,6 +53,9 @@ TPADVSCommand::TPADVSCommand() :
 	_pVehGeomMulLstContextMenu = NULL;
 	_pHSO = NULL;
 	_pPSO = NULL;
+	_spLeftEyePoint = NULL_var;
+	_spRightEyePoint = NULL_var;
+	_spGroundPlane = NULL_var;
 }
 
 //-------------------------------------------------------------------------
@@ -58,6 +63,21 @@ TPADVSCommand::TPADVSCommand() :
 //-------------------------------------------------------------------------
 TPADVSCommand::~TPADVSCommand()
 {
+	CATGeoFactory_var spGeoFactory = NULL_var;
+	if (NULL != _pTPACommonUtiliy)
+	{
+		spGeoFactory = _pTPACommonUtiliy->GetPartGeoFactory();
+	}
+	if (spGeoFactory != NULL_var)
+	{
+		for (int i = 1; i <= _transientCGMBodies.Size(); ++i)
+		{
+			CATBody* pBody = _transientCGMBodies[i];
+			if (pBody) spGeoFactory->Remove(pBody);
+		}
+	}
+	_transientCGMBodies.RemoveAll();
+
 	_pTPACommonUtiliy = NULL;
 	if(NULL != _pDVSDirView3DDlg)
 	{
@@ -184,6 +204,8 @@ CATBoolean TPADVSCommand::ActionOnVechGeomMultiListRemove()
 		_ListOfSelectedSurfaces.RemovePosition(nRowIndex+ 1);
 	}
 	UpdateVehicleGeometryMultiList();
+	delete[] pArray;
+	pArray = NULL;
 	return TRUE;
 }
 
@@ -211,6 +233,8 @@ CATBoolean TPADVSCommand::ActionOnVehicleGeomMultiList()
 		_pHSO->AddElement(pPathElt);
 		_pPSO->AddElement(pPathElt);
 	}
+	delete[] pArray;
+	pArray = NULL;
 	return TRUE;
 }
 //-------------------------------------------------------------------------
@@ -227,7 +251,20 @@ CATBoolean TPADVSCommand::ActionOnClose()
 //-------------------------------------------------------------------------
 CATBoolean TPADVSCommand::ActionOnApply()
 {
-	ActionOnCreateCone();
+	int selectedIdx = 0;
+	if (NULL != _pDVSDirView3DDlg && NULL != _pDVSDirView3DDlg->GetStandardCombo())
+	{
+		selectedIdx = _pDVSDirView3DDlg->GetStandardCombo()->GetSelect();
+	}
+
+	if (selectedIdx == 0) // London DVS (TfL)
+	{
+		ActionOnComputeVolumetricDVS();
+	}
+	else
+	{
+		ActionOnCreateCone();
+	}
 	return TRUE;
 }
 
@@ -318,39 +355,38 @@ CATBoolean TPADVSCommand::ActionOnCreateCone()
 			CATMathPoint endPt =
 				ompEyePoint + (10000 * finalDir);
 
-			CATLine* pLine =
-				spGeoFactory->CreateLine(
-				ompEyePoint,
-				endPt);
+			// Calculate the bounding box of the line segment manually
+			double xmin = ompEyePoint.GetX() < endPt.GetX() ? ompEyePoint.GetX() : endPt.GetX();
+			double xmax = ompEyePoint.GetX() > endPt.GetX() ? ompEyePoint.GetX() : endPt.GetX();
+			double ymin = ompEyePoint.GetY() < endPt.GetY() ? ompEyePoint.GetY() : endPt.GetY();
+			double ymax = ompEyePoint.GetY() > endPt.GetY() ? ompEyePoint.GetY() : endPt.GetY();
+			double zmin = ompEyePoint.GetZ() < endPt.GetZ() ? ompEyePoint.GetZ() : endPt.GetZ();
+			double zmax = ompEyePoint.GetZ() > endPt.GetZ() ? ompEyePoint.GetZ() : endPt.GetZ();
+			CATMathBox mathBox(xmin, xmax, ymin, ymax, zmin, zmax);
 
-			if(NULL != pLine)
+			CATBoolean bIntersectionFound = CATFalse;
+			for(int nMathItr = 1; nMathItr <= listOfMathBoxes.Size(); nMathItr++)
 			{
-				CATMathBox mathBox = pLine->GetBoundingBox();
-				CATBoolean bIntersectionFound = CATFalse;
-				for(int nMathItr = 1; nMathItr <= listOfMathBoxes.Size(); nMathItr++)
+				CATMathBox *mathBoxBody = (CATMathBox*)listOfMathBoxes[nMathItr];
+				if(NULL == mathBoxBody)
+					continue;
+				CATBoolean bIntersection = mathBoxBody->IsIntersecting(mathBox);
+				if(bIntersection)
 				{
-					CATMathBox *mathBoxBody = (CATMathBox*)listOfMathBoxes[nMathItr];
-					if(NULL == mathBoxBody)
-						continue;
-					CATBoolean bIntersection = mathBoxBody->IsIntersecting(mathBox);
-					if(bIntersection)
-					{
-						bIntersectionFound = CATTrue;
-						break;
-					}
+					bIntersectionFound = CATTrue;
+					break;
 				}
-				if(bIntersectionFound == CATFalse)
-					continue;
-				CATI3DGeoVisu_var sp3DGeoVisu = pLine;
+			}
+			if(bIntersectionFound == CATFalse)
+				continue;
 
-				if(!sp3DGeoVisu)
-					continue;
-
-				CATRep* pRep = sp3DGeoVisu->BuildRep();
-
-				if(NULL == pRep)
-					continue;
-
+			// Construct a pure visualization line representation (does not pollute geometry container)
+			double ptStart[3], ptEnd[3];
+			ompEyePoint.GetCoord(ptStart);
+			endPt.GetCoord(ptEnd);
+			CAT3DLineRep* pRep = new CAT3DLineRep(ptStart, ptEnd);
+			if(NULL != pRep)
+			{
 				pRep->SetInheritanceMode(COLOR_INHERITANCE);
 				pRep->GetGraphicAttributeSet().SetColor(GREEN);
 
@@ -360,5 +396,195 @@ CATBoolean TPADVSCommand::ActionOnCreateCone()
 	}
 	_pViewer->AddRep(_p3DBagRep);
 	_pViewer->Draw();
+	return TRUE;
+}
+
+//-------------------------------------------------------------------------
+// ActionOnComputeVolumetricDVS ()
+//-------------------------------------------------------------------------
+CATBoolean TPADVSCommand::ActionOnComputeVolumetricDVS()
+{
+	HRESULT hr = E_FAIL;
+	if (NULL == _pViewer || NULL == _p3DBagRep || NULL == _pTPACommonUtiliy)
+		return FALSE;
+
+	_pViewer->RemoveRep(_p3DBagRep);
+	_p3DBagRep->Destroy();
+	_pViewer->Draw();
+	_p3DBagRep = new CAT3DBagRep();
+
+	// Retrieve the active CATIA geometry factory
+	CATGeoFactory_var spGeoFactory = _pTPACommonUtiliy->GetPartGeoFactory();
+	if (!spGeoFactory)
+		return FALSE;
+
+	// 1. Clean up transient bodies from the previous run to prevent leaks
+	if (spGeoFactory != NULL_var)
+	{
+		for (int i = 1; i <= _transientCGMBodies.Size(); ++i)
+		{
+			CATBody* pBody = _transientCGMBodies[i];
+			if (pBody) spGeoFactory->Remove(pBody);
+		}
+	}
+	_transientCGMBodies.RemoveAll();
+
+	// 2. Retrieve Eye Points (with fallbacks if selections are empty)
+	CATMathPoint mpLeftEye, mpRightEye;
+	CATBaseUnknown_var spLeftEye = _spLeftEyePoint;
+	CATBaseUnknown_var spRightEye = _spRightEyePoint;
+
+	if (!spLeftEye || !spRightEye)
+	{
+		spLeftEye = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "LeftSidePoint");
+		spRightEye = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "RightSidePoint");
+	}
+
+	if (!spLeftEye || !spRightEye)
+		return FALSE;
+
+	hr = _pTPACommonUtiliy->GetMathPointFromFeature(spLeftEye, mpLeftEye);
+	if (FAILED(hr)) return FALSE;
+
+	hr = _pTPACommonUtiliy->GetMathPointFromFeature(spRightEye, mpRightEye);
+	if (FAILED(hr)) return FALSE;
+
+	CATMathPoint mpEyeCenter = (mpLeftEye + mpRightEye) / 2.0;
+
+	// 3. Initialize the modular Volumetric Compliance Engine
+	TPAVolumetricDVSEngine engine(spGeoFactory);
+
+	// 4. Step 1: SAV Construction (TfL Standard Assessment Volume)
+	double groundZ = 0.0;
+	if (_spGroundPlane != NULL_var)
+	{
+		CATMathPoint gpPoint;
+		_pTPACommonUtiliy->GetMathPointFromFeature(_spGroundPlane, gpPoint);
+		groundZ = gpPoint.GetZ();
+	}
+
+	CATBody* pSAVBody = NULL;
+	hr = engine.CreateStandardAssessmentVolume(mpEyeCenter, groundZ, pSAVBody);
+	if (FAILED(hr) || NULL == pSAVBody)
+		return FALSE;
+
+	// 5. Step 2: Cone Generation (Sight Cones passing through glazing)
+	CATBody* pSightCone = NULL;
+	hr = engine.GenerateSightCones(mpEyeCenter, _ListOfSelectedSurfaces, pSightCone);
+	if (FAILED(hr) || NULL == pSightCone)
+	{
+		if (pSAVBody) spGeoFactory->Remove(pSAVBody);
+		return FALSE;
+	}
+
+	// 6. Step 3: Shadow Casting (Generating shadow solids from driver's eye position)
+	CATLISTP(CATBody) shadowBodies;
+	hr = engine.GenerateObstacleShadows(mpEyeCenter, _ListOfObstacleBodies, 10000.0, shadowBodies);
+
+	// Retrieve obstacle bodies list
+	CATLISTP(CATBody) obstacleBodies;
+	for (int nObs = 1; nObs <= _ListOfObstacleBodies.Size(); ++nObs)
+	{
+		CATBody_var spObsBody = _pTPACommonUtiliy->GetBodyFromFeature(_ListOfObstacleBodies[nObs]);
+		if (spObsBody != NULL_var)
+		{
+			obstacleBodies.Append((CATBody*)spObsBody);
+		}
+	}
+
+	// 7. Step 4: Boolean Cut (Subtract obstacles/shadows, intersect with SAV)
+	CATBody* pVisibleVolume = NULL;
+	hr = engine.ComputeVisibilityVolume(pSightCone, obstacleBodies, shadowBodies, pSAVBody, pVisibleVolume);
+
+	// 8. Step 5: Measurement (Mass properties calculation in cubic meters)
+	double dVolumeM3 = 0.0;
+	if (SUCCEEDED(hr) && NULL != pVisibleVolume)
+	{
+		hr = engine.MeasureVisibleVolume(pVisibleVolume, dVolumeM3);
+	}
+
+	// 9. Update viewport visualization with intermediate and final solids
+	
+	// A. Visualize the Standard Assessment Volume (SAV) in BLUE
+	if (NULL != pSAVBody)
+	{
+		CATI3DGeoVisu_var spVisuSAV = pSAVBody;
+		if (spVisuSAV != NULL_var)
+		{
+			CATRep* pRepSAV = spVisuSAV->BuildRep();
+			if (NULL != pRepSAV)
+			{
+				pRepSAV->SetInheritanceMode(COLOR_INHERITANCE);
+				pRepSAV->GetGraphicAttributeSet().SetColor(BLUE);
+				_p3DBagRep->AddChild(*pRepSAV);
+			}
+		}
+	}
+
+	// B. Visualize the Raw Sight Cone in CYAN
+	if (NULL != pSightCone)
+	{
+		CATI3DGeoVisu_var spVisuCone = pSightCone;
+		if (spVisuCone != NULL_var)
+		{
+			CATRep* pRepCone = spVisuCone->BuildRep();
+			if (NULL != pRepCone)
+			{
+				pRepCone->SetInheritanceMode(COLOR_INHERITANCE);
+				pRepCone->GetGraphicAttributeSet().SetColor(CYAN);
+				_p3DBagRep->AddChild(*pRepCone);
+			}
+		}
+	}
+
+	// C. Visualize all Obscuration / Shadow Volumes in RED
+	for (int nShadItr = 1; nShadItr <= shadowBodies.Size(); ++nShadItr)
+	{
+		CATBody* pShad = shadowBodies[nShadItr];
+		if (NULL != pShad)
+		{
+			CATI3DGeoVisu_var spVisuShad = pShad;
+			if (spVisuShad != NULL_var)
+			{
+				CATRep* pRepShad = spVisuShad->BuildRep();
+				if (NULL != pRepShad)
+				{
+					pRepShad->SetInheritanceMode(COLOR_INHERITANCE);
+					pRepShad->GetGraphicAttributeSet().SetColor(RED);
+					_p3DBagRep->AddChild(*pRepShad);
+				}
+			}
+		}
+	}
+
+	// D. Visualize the Final Visible Volume in GREEN
+	if (NULL != pVisibleVolume)
+	{
+		CATI3DGeoVisu_var sp3DGeoVisu = pVisibleVolume;
+		if (sp3DGeoVisu != NULL_var)
+		{
+			CATRep* pRep = sp3DGeoVisu->BuildRep();
+			if (NULL != pRep)
+			{
+				pRep->SetInheritanceMode(COLOR_INHERITANCE);
+				pRep->GetGraphicAttributeSet().SetColor(GREEN);
+				_p3DBagRep->AddChild(*pRep);
+			}
+		}
+	}
+
+	_pViewer->AddRep(_p3DBagRep);
+	_pViewer->Draw();
+
+	// 10. Register bodies in transient list for visual retention and later clean-up
+	if (pSightCone) _transientCGMBodies.Append(pSightCone);
+	if (pSAVBody) _transientCGMBodies.Append(pSAVBody);
+	if (pVisibleVolume) _transientCGMBodies.Append(pVisibleVolume);
+	for (int nShad = 1; nShad <= shadowBodies.Size(); ++nShad)
+	{
+		CATBody* pShad = shadowBodies[nShad];
+		if (pShad) _transientCGMBodies.Append(pShad);
+	}
+
 	return TRUE;
 }
