@@ -1,0 +1,332 @@
+// DO NOT EDIT :: THE CAA2 WIZARD WILL REPLACE ALL THE CODE HERE
+CATDlgDialog TPADVSDirectView3DDlg
+{
+  STYLE = CATDlgWndBtnOKApplyClose|CATDlgGridLayout;
+}
+
+CATDlgFrame FrmDefinition
+{
+  FATHER = TPADVSDirectView3DDlg;
+  STYLE = CATDlgGridLayout;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame FrmDefinitionInputs
+{
+  FATHER = FrmDefinition;
+  STYLE = CATDlgFraNoFrame|CATDlgGridLayout;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgLabel LblBaseData
+{
+  FATHER = FrmDefinitionInputs;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgLabel LblStandard
+{
+  FATHER = FrmDefinitionInputs;
+  GRID = { 1, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgLabel LblLoading
+{
+  FATHER = FrmDefinitionInputs;
+  GRID = { 2, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgSelectorList SelListBaseData
+{
+  FATHER = FrmDefinitionInputs;
+  TH = 1;
+  TW = 16;
+  GRID = { 0, 1, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgSelectorList SelListStandard
+{
+  FATHER = FrmDefinitionInputs;
+  TH = 1;
+  TW = 16;
+  GRID = { 1, 1, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgSelectorList SelListLoading
+{
+  FATHER = FrmDefinitionInputs;
+  TH = 1;
+  TW = 16;
+  GRID = { 2, 1, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgCheckButton CheckButtFree
+{
+  FATHER = FrmDefinitionInputs;
+  GRID = { 1, 2, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame FrmDefinitionUse
+{
+  FATHER = FrmDefinition;
+  STYLE = CATDlgFraNoFrame|CATDlgGridLayout;
+  GRID = { 1, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgRadioButton RadioButtUseStandardEyes
+{
+  FATHER = FrmDefinitionUse;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgRadioButton RadioButtUseV5Pts
+{
+  FATHER = FrmDefinitionUse;
+  GRID = { 0, 1, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgRadioButton RadioButtUseMultipleEyes
+{
+  FATHER = FrmDefinitionUse;
+  GRID = { 0, 2, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame Frame007
+{
+  FATHER = TPADVSDirectView3DDlg;
+  STYLE = CATDlgFraNoFrame|CATDlgGridLayout;
+  GRID = { 1, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgTabContainer TabContainer008
+{
+  FATHER = Frame007;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgTabPage FirstPage
+{
+  FATHER = TabContainer008;
+  STYLE = CATDlgGridLayout;
+}
+
+CATDlgFrame FrmView
+{
+  FATHER = FirstPage;
+  STYLE = CATDlgGridLayout;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame Frame019
+{
+  FATHER = FrmView;
+  STYLE = CATDlgFraNoFrame|CATDlgGridLayout;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgLabel LblRange
+{
+  FATHER = Frame019;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgSpinner SpinnerRange
+{
+  FATHER = Frame019;
+  STYLE = CATDlgSpnEntry|CATDlgSpnDouble;
+  MIN = 0.000000;
+  MAX = 360.000000;
+  STEP = 360.000000;
+  UNIT = Degree;
+  MAGN = Angle;
+  PREC = 0;
+  GRID = { 0, 1, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgLabel LablComputation
+{
+  FATHER = Frame019;
+  GRID = { 0, 2, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgCombo Combo022
+{
+  FATHER = Frame019;
+  STYLE = CATDlgCmbDropDown|CATDlgCmbDouble;
+  PREC = 0;
+  GRID = { 0, 3, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame Frame020
+{
+  FATHER = FrmView;
+  STYLE = CATDlgFraNoFrame|CATDlgGridLayout;
+  GRID = { 1, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgLabel LblOrientation
+{
+  FATHER = Frame020;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgCombo ComboOrientation
+{
+  FATHER = Frame020;
+  STYLE = CATDlgCmbDropDown|CATDlgCmbDouble;
+  PREC = 0;
+  GRID = { 0, 1, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgSpinner SpinnerOrientationDegree
+{
+  FATHER = Frame020;
+  STYLE = CATDlgSpnEntry;
+  MIN = 0.000000;
+  MAX = 360.000000;
+  STEP = 360.000000;
+  GRID = { 0, 2, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame FrmTargetSurface
+{
+  FATHER = FirstPage;
+  STYLE = CATDlgGridLayout;
+  GRID = { 1, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame Frame029
+{
+  FATHER = FrmTargetSurface;
+  STYLE = CATDlgFraNoFrame|CATDlgGridLayout;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgLabel LblTypeTargetSurface
+{
+  FATHER = Frame029;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgCombo Combo028
+{
+  FATHER = Frame029;
+  STYLE = CATDlgCmbDropDown|CATDlgCmbDouble;
+  PREC = 0;
+  GRID = { 0, 1, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgEditor EditorTargetSurfaceTypeValue
+{
+  FATHER = Frame029;
+  GRID = { 0, 2, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame Frame030
+{
+  FATHER = FrmTargetSurface;
+  STYLE = CATDlgFraNoFrame|CATDlgGridLayout;
+  GRID = { 1, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgCheckButton CheckButtVisualizeTargetSurface
+{
+  FATHER = Frame030;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame FrmSelSurface
+{
+  FATHER = FirstPage;
+  STYLE = CATDlgGridLayout;
+  GRID = { 2, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame Frame033
+{
+  FATHER = FrmSelSurface;
+  STYLE = CATDlgFraNoFrame|CATDlgGridLayout;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgLabel LblSurface
+{
+  FATHER = Frame033;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgEditor EditorSurface
+{
+  FATHER = Frame033;
+  TH = 1;
+  TW = 25;
+  GRID = { 0, 1, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgPushButton PushButtCGR
+{
+  FATHER = Frame033;
+  GRID = { 0, 2, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame Frame037
+{
+  FATHER = FrmSelSurface;
+  STYLE = CATDlgFraNoFrame|CATDlgGridLayout;
+  GRID = { 1, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgCheckButton CheckButtVisuaSelSurface
+{
+  FATHER = Frame037;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame FrmDiscretization
+{
+  FATHER = FirstPage;
+  STYLE = CATDlgFraNoFrame|CATDlgGridLayout;
+  GRID = { 3, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgLabel LblDiscretization
+{
+  FATHER = FrmDiscretization;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgLabel LblAccurate
+{
+  FATHER = FrmDiscretization;
+  GRID = { 0, 1, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgFrame FrmUserSelInput
+{
+  FATHER = TPADVSDirectView3DDlg;
+  STYLE = CATDlgFraNoFrame|CATDlgGridLayout;
+  GRID = { 2, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgTabContainer TabContainer039
+{
+  FATHER = FrmUserSelInput;
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+CATDlgTabPage TabVehicleGeometry
+{
+  FATHER = TabContainer039;
+  STYLE = CATDlgGridLayout;
+}
+
+CATDlgMultiList MulitListVehicleGeometry
+{
+  FATHER = TabVehicleGeometry;
+  CC = 2;
+  VCC = 2;
+  COLWTH = { 0, 23, 1, 10 };
+  GRID = { 0, 0, 1, 1, CATGRID_4SIDES };
+}
+
+// END WIZARD REPLACEMENT ZONE

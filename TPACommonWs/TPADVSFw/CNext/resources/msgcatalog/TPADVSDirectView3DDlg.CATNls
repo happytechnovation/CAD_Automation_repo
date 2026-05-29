@@ -1,0 +1,30 @@
+// DO NOT EDIT :: THE CAA2 WIZARD WILL REPLACE ALL THE CODE HERE
+Title = "Volvo Direct View 3D";
+FrmDefinition.Title = "Definitions";
+FrmDefinition.FrmDefinitionInputs.LblBaseData.Title = "Base Data:    ";
+FrmDefinition.FrmDefinitionInputs.LblStandard.Title = "Standard:";
+FrmDefinition.FrmDefinitionInputs.LblLoading.Title = "Loading:";
+FrmDefinition.FrmDefinitionInputs.CheckButtFree.Title = "Free";
+FrmDefinition.FrmDefinitionUse.RadioButtUseStandardEyes.Title = "Use Standard Eyes";
+FrmDefinition.FrmDefinitionUse.RadioButtUseV5Pts.Title = "Use V5 Points";
+FrmDefinition.FrmDefinitionUse.RadioButtUseMultipleEyes.Title = "Use Multiple Eyes";
+Frame007.TabContainer008.FirstPage.Title = "First Page";
+Frame007.TabContainer008.FirstPage.FrmView.Title = "View";
+Frame007.TabContainer008.FirstPage.FrmView.Frame019.LblRange.Title = "Range :";
+Frame007.TabContainer008.FirstPage.FrmView.Frame019.LablComputation.Title = "          Computation :   ";
+Frame007.TabContainer008.FirstPage.FrmView.Frame020.LblOrientation.Title = "Orientation : ";
+Frame007.TabContainer008.FirstPage.FrmTargetSurface.Title = "Target Surface (always used for calculation)";
+Frame007.TabContainer008.FirstPage.FrmTargetSurface.Frame029.LblTypeTargetSurface.Title = "Type :  ";
+Frame007.TabContainer008.FirstPage.FrmTargetSurface.Frame030.CheckButtVisualizeTargetSurface.Title = "Visualize on Target Surface";
+Frame007.TabContainer008.FirstPage.FrmSelSurface.Title = "Selected Surface (Option Usage)";
+Frame007.TabContainer008.FirstPage.FrmSelSurface.Frame033.LblSurface.Title = "Surface  :  ";
+Frame007.TabContainer008.FirstPage.FrmSelSurface.Frame033.PushButtCGR.Title = "CGR";
+Frame007.TabContainer008.FirstPage.FrmSelSurface.Frame037.CheckButtVisuaSelSurface.Title = "Visualize on Selected Surface";
+Frame007.TabContainer008.FirstPage.FrmDiscretization.LblDiscretization.Title = "Discretization : ";
+Frame007.TabContainer008.FirstPage.FrmDiscretization.LblAccurate.Title = "accurate";
+FrmUserSelInput.Title = "Surface Input";
+FrmUserSelInput.TabContainer039.TabVehicleGeometry.Title = "Vehicle Geometry";
+ FrmUserSelInput.TabContainer039.TabVehicleGeometry.MulitListVehicleGeometry.ColumnTitle1 = "Element";
+ FrmUserSelInput.TabContainer039.TabVehicleGeometry.MulitListVehicleGeometry.ColumnTitle2 = "Type";
+// END WIZARD REPLACEMENT ZONE
+Frame007.TabContainer008.FirstPage.FrmDiscretization.SliderAccuracyID.Title = "dfdf";

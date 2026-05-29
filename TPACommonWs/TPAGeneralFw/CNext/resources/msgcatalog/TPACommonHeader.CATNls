@@ -1,0 +1,4 @@
+TPACommonHeader.TPAAutoDrawingCmdID.Title = "TPA Command";
+TPACommonHeader.TPAAutoDrawingCmdID.Help = "TPA Command";
+TPACommonHeader.TPAAutoDrawingCmdID.ShortHelp = "TPA Command";
+TPACommonHeader.TPAAutoDrawingCmdID.LongHelp = "TPA Command";
