@@ -53,9 +53,12 @@ TPADVSCommand::TPADVSCommand() :
 	_pVehGeomMulLstContextMenu = NULL;
 	_pHSO = NULL;
 	_pPSO = NULL;
-	_spLeftEyePoint = NULL_var;
-	_spRightEyePoint = NULL_var;
 	_spGroundPlane = NULL_var;
+	_spAccelKeyPt = NULL_var;
+	_spSeatMidPt = NULL_var;
+	_spLeftEyePoint = NULL_var;
+	_spMidEyePoint = NULL_var;
+	_spRightEyePoint = NULL_var;
 }
 
 //-------------------------------------------------------------------------
@@ -129,12 +132,18 @@ void TPADVSCommand::BuildGraph()
 	AddAnalyseNotificationCB(_pDVSDirView3DDlg, _pDVSDirView3DDlg->GetDiaCLOSENotification(),(CATCommandMethod)&TPADVSCommand::ActionOnClose , (CATCommandClientData)CATINT32ToPtr(0));
 	AddAnalyseNotificationCB(_pDVSDirView3DDlg, _pDVSDirView3DDlg->GetWindCloseNotification(),(CATCommandMethod)&TPADVSCommand::ActionOnClose , (CATCommandClientData)CATINT32ToPtr(0));
 	AddAnalyseNotificationCB(_pDVSDirView3DDlg->GetVehicleGeometryMultiList(), _pDVSDirView3DDlg->GetVehicleGeometryMultiList()->GetListSelectNotification(),(CATCommandMethod)&TPADVSCommand::ActionOnVehicleGeomMultiList , (CATCommandClientData)CATINT32ToPtr(0));
+	AddAnalyseNotificationCB(_pDVSDirView3DDlg->GetRadioButtGenFromAHP(), _pDVSDirView3DDlg->GetRadioButtGenFromAHP()->GetRadBttnNotification(),(CATCommandMethod)&TPADVSCommand::ActionOnRadioGenFromAHP , (CATCommandClientData)CATINT32ToPtr(0));
+	AddAnalyseNotificationCB(_pDVSDirView3DDlg->GetRadioButtSelectDirectly(), _pDVSDirView3DDlg->GetRadioButtSelectDirectly()->GetRadBttnNotification(),(CATCommandMethod)&TPADVSCommand::ActionOnRadioSelectDirectly , (CATCommandClientData)CATINT32ToPtr(0));
 
 	//Agents
 	CATListOfCATString listOfAllowedSurfaces;
 	_pPathEltAgentSeltSurfaces = new CATPathElementAgent("PathEltAgentSeltSurfacesID");
 	_pPathEltAgentSeltSurfaces->SetBehavior( CATDlgEngWithPSOHSO  | CATDlgEngWithPrevaluation | CATDlgEngRepeat);
 	listOfAllowedSurfaces.Append("CATIGSMAssemble");
+	listOfAllowedSurfaces.Append("CATPoint");
+	listOfAllowedSurfaces.Append("CATPlane");
+	listOfAllowedSurfaces.Append("CATIGSMPoint");
+	listOfAllowedSurfaces.Append("CATIGSMPlane");
 	_pPathEltAgentSeltSurfaces->SetOrderedTypeList(listOfAllowedSurfaces);
 
 	CATDialogState *pInitialState = GetInitialState("InitialStateID");
@@ -159,9 +168,78 @@ CATBoolean TPADVSCommand::ActionOnSurfaceGeomSelect()
 	CATISpecObject_var spSpecObj = pPathElement->FindElement(IID_CATISpecObject);
 	if(!spSpecObj)
 		return bSuccess;
-	_ListOfSelectedSurfaces.Append(spSpecObj);
-	UpdateVehicleGeometryMultiList();
+
+	CATUnicodeString typeName = spSpecObj->GetType();
 	CATUnicodeString usFeatName = TPACommonUtilityClass::GetClassObject()->GetNameOfFeature(spSpecObj);
+
+	if (typeName.SearchSubString("Plane") >= 0)
+	{
+		_spGroundPlane = spSpecObj;
+		if (NULL != _pDVSDirView3DDlg && NULL != _pDVSDirView3DDlg->GetGroundPlaneEditor())
+		{
+			_pDVSDirView3DDlg->GetGroundPlaneEditor()->SetText(usFeatName);
+		}
+	}
+	else if (typeName.SearchSubString("Point") >= 0)
+	{
+		CATBoolean isGenFromAHP = CATTrue;
+		if (NULL != _pDVSDirView3DDlg && NULL != _pDVSDirView3DDlg->GetRadioButtGenFromAHP())
+		{
+			isGenFromAHP = (_pDVSDirView3DDlg->GetRadioButtGenFromAHP()->GetState() == CATDlgCheck);
+		}
+
+		if (isGenFromAHP)
+		{
+			if (_spAccelKeyPt == NULL_var)
+			{
+				_spAccelKeyPt = spSpecObj;
+				if (NULL != _pDVSDirView3DDlg && NULL != _pDVSDirView3DDlg->GetAccelKeyPtEditor())
+				{
+					_pDVSDirView3DDlg->GetAccelKeyPtEditor()->SetText(usFeatName);
+				}
+			}
+			else
+			{
+				_spSeatMidPt = spSpecObj;
+				if (NULL != _pDVSDirView3DDlg && NULL != _pDVSDirView3DDlg->GetSeatMidPtEditor())
+				{
+					_pDVSDirView3DDlg->GetSeatMidPtEditor()->SetText(usFeatName);
+				}
+			}
+		}
+		else
+		{
+			if (_spLeftEyePoint == NULL_var)
+			{
+				_spLeftEyePoint = spSpecObj;
+				if (NULL != _pDVSDirView3DDlg && NULL != _pDVSDirView3DDlg->GetLeftEyeEditor())
+				{
+					_pDVSDirView3DDlg->GetLeftEyeEditor()->SetText(usFeatName);
+				}
+			}
+			else if (_spMidEyePoint == NULL_var)
+			{
+				_spMidEyePoint = spSpecObj;
+				if (NULL != _pDVSDirView3DDlg && NULL != _pDVSDirView3DDlg->GetMidEyeEditor())
+				{
+					_pDVSDirView3DDlg->GetMidEyeEditor()->SetText(usFeatName);
+				}
+			}
+			else
+			{
+				_spRightEyePoint = spSpecObj;
+				if (NULL != _pDVSDirView3DDlg && NULL != _pDVSDirView3DDlg->GetRightEyeEditor())
+				{
+					_pDVSDirView3DDlg->GetRightEyeEditor()->SetText(usFeatName);
+				}
+			}
+		}
+	}
+	else
+	{
+		_ListOfSelectedSurfaces.Append(spSpecObj);
+		UpdateVehicleGeometryMultiList();
+	}
 	
 	_pPathEltAgentSeltSurfaces->InitializeAcquisition();
 	return TRUE;
@@ -429,42 +507,110 @@ CATBoolean TPADVSCommand::ActionOnComputeVolumetricDVS()
 	}
 	_transientCGMBodies.RemoveAll();
 
-	// 2. Retrieve Eye Points (with fallbacks if selections are empty)
-	CATMathPoint mpLeftEye, mpRightEye;
-	CATBaseUnknown_var spLeftEye = _spLeftEyePoint;
-	CATBaseUnknown_var spRightEye = _spRightEyePoint;
-
-	if (!spLeftEye || !spRightEye)
-	{
-		spLeftEye = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "LeftSidePoint");
-		spRightEye = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "RightSidePoint");
-	}
-
-	if (!spLeftEye || !spRightEye)
-		return FALSE;
-
-	hr = _pTPACommonUtiliy->GetMathPointFromFeature(spLeftEye, mpLeftEye);
-	if (FAILED(hr)) return FALSE;
-
-	hr = _pTPACommonUtiliy->GetMathPointFromFeature(spRightEye, mpRightEye);
-	if (FAILED(hr)) return FALSE;
-
-	CATMathPoint mpEyeCenter = (mpLeftEye + mpRightEye) / 2.0;
-
-	// 3. Initialize the modular Volumetric Compliance Engine
-	TPAVolumetricDVSEngine engine(spGeoFactory);
-
-	// 4. Step 1: SAV Construction (TfL Standard Assessment Volume)
+	// 2. Retrieve Eye Points & Ground Plane
+	CATMathPoint mpLeftEye, mpRightEye, mpEyeCenter;
+	CATMathPoint gpPoint(0.0, 0.0, 0.0);
 	double groundZ = 0.0;
 	if (_spGroundPlane != NULL_var)
 	{
-		CATMathPoint gpPoint;
 		_pTPACommonUtiliy->GetMathPointFromFeature(_spGroundPlane, gpPoint);
 		groundZ = gpPoint.GetZ();
 	}
 
+	// 3. Initialize the modular Volumetric Compliance Engine
+	TPAVolumetricDVSEngine engine(spGeoFactory);
+
+	CATBoolean isGenFromAHP = CATTrue;
+	if (NULL != _pDVSDirView3DDlg && NULL != _pDVSDirView3DDlg->GetRadioButtGenFromAHP())
+	{
+		isGenFromAHP = (_pDVSDirView3DDlg->GetRadioButtGenFromAHP()->GetState() == CATDlgCheck);
+	}
+
+	if (isGenFromAHP)
+	{
+		CATMathPoint mpAHP, mpSeatMid;
+		CATBaseUnknown_var spAHP = _spAccelKeyPt;
+		CATBaseUnknown_var spSeatMid = _spSeatMidPt;
+
+		if (!spAHP)
+		{
+			spAHP = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "LeftSidePoint");
+		}
+		if (!spSeatMid)
+		{
+			spSeatMid = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "RightSidePoint");
+		}
+
+		if (!spAHP || !spSeatMid)
+			return FALSE;
+
+		hr = _pTPACommonUtiliy->GetMathPointFromFeature(spAHP, mpAHP);
+		if (FAILED(hr)) return FALSE;
+
+		hr = _pTPACommonUtiliy->GetMathPointFromFeature(spSeatMid, mpSeatMid);
+		if (FAILED(hr)) return FALSE;
+
+		double dLengthOffset = 678.0;
+		if (NULL != _pDVSDirView3DDlg && NULL != _pDVSDirView3DDlg->GetLengthOffsetSpinner())
+		{
+			dLengthOffset = _pDVSDirView3DDlg->GetLengthOffsetSpinner()->GetValue();
+		}
+
+		// Dynamic forward vector determination
+		CATMathVector mvForwardDir(-1.0, 0.0, 0.0); // Default forward (-X)
+		CATMathVector mvUpDir(0.0, 0.0, 1.0); // Default up (+Z)
+		CATBaseUnknown_var spDefaultEye = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "EyeSightPoint");
+		CATBaseUnknown_var spDefaultLeft = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "LeftSidePoint");
+		CATBaseUnknown_var spDefaultRight = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "RightSidePoint");
+		if (spDefaultEye != NULL_var && spDefaultLeft != NULL_var && spDefaultRight != NULL_var)
+		{
+			CATMathPoint ptEye, ptLeft, ptRight;
+			_pTPACommonUtiliy->GetMathPointFromFeature(spDefaultEye, ptEye);
+			_pTPACommonUtiliy->GetMathPointFromFeature(spDefaultLeft, ptLeft);
+			_pTPACommonUtiliy->GetMathPointFromFeature(spDefaultRight, ptRight);
+			CATMathPoint ptBack = (ptLeft + ptRight) / 2.0;
+			mvForwardDir = ptEye - ptBack;
+			mvForwardDir.Normalize();
+		}
+
+		hr = engine.GenerateEyePointsFromAHP(mpAHP, mpSeatMid, dLengthOffset, mvForwardDir, mvUpDir, mpLeftEye, mpEyeCenter, mpRightEye);
+		if (FAILED(hr)) return FALSE;
+	}
+	else
+	{
+		CATBaseUnknown_var spLeft = _spLeftEyePoint;
+		CATBaseUnknown_var spMid = _spMidEyePoint;
+		CATBaseUnknown_var spRight = _spRightEyePoint;
+
+		if (!spLeft || !spMid || !spRight)
+		{
+			spLeft = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "LeftSidePoint");
+			spMid = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "EyeSightPoint");
+			spRight = _pTPACommonUtiliy->FindElementByName(_pTPACommonUtiliy->GetRootElement(), "RightSidePoint");
+		}
+
+		if (!spLeft || !spMid || !spRight)
+			return FALSE;
+
+		hr = _pTPACommonUtiliy->GetMathPointFromFeature(spLeft, mpLeftEye);
+		if (FAILED(hr)) return FALSE;
+
+		hr = _pTPACommonUtiliy->GetMathPointFromFeature(spMid, mpEyeCenter);
+		if (FAILED(hr)) return FALSE;
+
+		hr = _pTPACommonUtiliy->GetMathPointFromFeature(spRight, mpRightEye);
+		if (FAILED(hr)) return FALSE;
+	}
+
+	// 4. Step 1: SAV Construction based on Standard
+	int iStandard = 0;
+	if (NULL != _pDVSDirView3DDlg && NULL != _pDVSDirView3DDlg->GetStandardCombo())
+	{
+		iStandard = _pDVSDirView3DDlg->GetStandardCombo()->GetSelect();
+	}
+
 	CATBody* pSAVBody = NULL;
-	hr = engine.CreateStandardAssessmentVolume(mpEyeCenter, groundZ, pSAVBody);
+	hr = engine.CreateStandardAssessmentVolume(mpEyeCenter, groundZ, iStandard, pSAVBody);
 	if (FAILED(hr) || NULL == pSAVBody)
 		return FALSE;
 
@@ -585,6 +731,46 @@ CATBoolean TPADVSCommand::ActionOnComputeVolumetricDVS()
 		CATBody* pShad = shadowBodies[nShad];
 		if (pShad) _transientCGMBodies.Append(pShad);
 	}
+
+	return TRUE;
+}
+
+//-------------------------------------------------------------------------
+// ActionOnRadioGenFromAHP ()
+//-------------------------------------------------------------------------
+CATBoolean TPADVSCommand::ActionOnRadioGenFromAHP()
+{
+	if (NULL == _pDVSDirView3DDlg) return TRUE;
+	_pDVSDirView3DDlg->GetRadioButtGenFromAHP()->SetState(CATDlgCheck, TRUE);
+	_pDVSDirView3DDlg->GetRadioButtSelectDirectly()->SetState(CATDlgCheck, FALSE);
+
+	_pDVSDirView3DDlg->GetAccelKeyPtEditor()->SetSensitivity(CATDlgEnable);
+	_pDVSDirView3DDlg->GetSeatMidPtEditor()->SetSensitivity(CATDlgEnable);
+	_pDVSDirView3DDlg->GetLengthOffsetSpinner()->SetSensitivity(CATDlgEnable);
+
+	_pDVSDirView3DDlg->GetLeftEyeEditor()->SetSensitivity(CATDlgDisable);
+	_pDVSDirView3DDlg->GetMidEyeEditor()->SetSensitivity(CATDlgDisable);
+	_pDVSDirView3DDlg->GetRightEyeEditor()->SetSensitivity(CATDlgDisable);
+
+	return TRUE;
+}
+
+//-------------------------------------------------------------------------
+// ActionOnRadioSelectDirectly ()
+//-------------------------------------------------------------------------
+CATBoolean TPADVSCommand::ActionOnRadioSelectDirectly()
+{
+	if (NULL == _pDVSDirView3DDlg) return TRUE;
+	_pDVSDirView3DDlg->GetRadioButtGenFromAHP()->SetState(CATDlgCheck, FALSE);
+	_pDVSDirView3DDlg->GetRadioButtSelectDirectly()->SetState(CATDlgCheck, TRUE);
+
+	_pDVSDirView3DDlg->GetAccelKeyPtEditor()->SetSensitivity(CATDlgDisable);
+	_pDVSDirView3DDlg->GetSeatMidPtEditor()->SetSensitivity(CATDlgDisable);
+	_pDVSDirView3DDlg->GetLengthOffsetSpinner()->SetSensitivity(CATDlgDisable);
+
+	_pDVSDirView3DDlg->GetLeftEyeEditor()->SetSensitivity(CATDlgEnable);
+	_pDVSDirView3DDlg->GetMidEyeEditor()->SetSensitivity(CATDlgEnable);
+	_pDVSDirView3DDlg->GetRightEyeEditor()->SetSensitivity(CATDlgEnable);
 
 	return TRUE;
 }

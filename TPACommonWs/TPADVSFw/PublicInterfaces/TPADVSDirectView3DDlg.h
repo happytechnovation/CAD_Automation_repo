@@ -50,10 +50,18 @@ class ExportedByTPADVSDialogModule TPADVSDirectView3DDlg: public CATDlgDialog
 
   CATDlgMultiList* GetVehicleGeometryMultiList(){return     _MulitListVehicleGeometry;}
 
-  CATDlgEditor* GetLeftEyeEditor(){return _EditorLeftEye;}
-  CATDlgEditor* GetRightEyeEditor(){return _EditorRightEye;}
   CATDlgEditor* GetGroundPlaneEditor(){return _EditorGroundPlane;}
   CATDlgCombo* GetStandardCombo(){return _ComboStandard;}
+  CATDlgRadioButton* GetRadioButtGenFromAHP(){return _RadioButtGenFromAHP;}
+  CATDlgRadioButton* GetRadioButtSelectDirectly(){return _RadioButtSelectDirectly;}
+  CATDlgEditor* GetAccelKeyPtEditor(){return _EditorAccelKeyPt;}
+  CATDlgEditor* GetSeatMidPtEditor(){return _EditorSeatMidPt;}
+  CATDlgSpinner* GetLengthOffsetSpinner(){return _SpinnerLengthOffset;}
+  CATDlgEditor* GetLeftEyeEditor(){return _EditorLeftEye;}
+  CATDlgEditor* GetMidEyeEditor(){return _EditorMidEye;}
+  CATDlgEditor* GetRightEyeEditor(){return _EditorRightEye;}
+  CATDlgSpinner* GetNeckPivotSpinner(){return _SpinnerNeckPivot;}
+  CATDlgSpinner* GetHeadRotationSpinner(){return _SpinnerHeadRotation;}
   protected:
 
   private:
@@ -110,14 +118,32 @@ class ExportedByTPADVSDialogModule TPADVSDirectView3DDlg: public CATDlgDialog
 //END CAA2 WIZARD WIDGET DECLARATION SECTION
   CATDlgSlider*	   _SliderAccuracy;
   CATDlgFrame*         _FrmVolumetric;
-  CATDlgLabel*         _LblLeftEye;
-  CATDlgEditor*        _EditorLeftEye;
-  CATDlgLabel*         _LblRightEye;
-  CATDlgEditor*        _EditorRightEye;
-  CATDlgLabel*         _LblGroundPlane;
-  CATDlgEditor*        _EditorGroundPlane;
   CATDlgLabel*         _LblComplianceStandard;
   CATDlgCombo*         _ComboStandard;
+  CATDlgLabel*         _LblGroundPlane;
+  CATDlgEditor*        _EditorGroundPlane;
+
+  CATDlgRadioButton*   _RadioButtGenFromAHP;
+  CATDlgRadioButton*   _RadioButtSelectDirectly;
+
+  CATDlgLabel*         _LblAccelKeyPt;
+  CATDlgEditor*        _EditorAccelKeyPt;
+  CATDlgLabel*         _LblSeatMidPt;
+  CATDlgEditor*        _EditorSeatMidPt;
+  CATDlgLabel*         _LblLengthOffset;
+  CATDlgSpinner*       _SpinnerLengthOffset;
+
+  CATDlgLabel*         _LblLeftEye;
+  CATDlgEditor*        _EditorLeftEye;
+  CATDlgLabel*         _LblMidEye;
+  CATDlgEditor*        _EditorMidEye;
+  CATDlgLabel*         _LblRightEye;
+  CATDlgEditor*        _EditorRightEye;
+
+  CATDlgLabel*         _LblNeckPivot;
+  CATDlgSpinner*       _SpinnerNeckPivot;
+  CATDlgLabel*         _LblHeadRotation;
+  CATDlgSpinner*       _SpinnerHeadRotation;
 };
 
 //----------------------------------------------------------------------

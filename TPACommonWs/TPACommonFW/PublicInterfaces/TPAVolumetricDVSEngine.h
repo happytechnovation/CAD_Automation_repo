@@ -30,7 +30,7 @@ public:
     ~TPAVolumetricDVSEngine();
 
     // 1. SAV Construction: Create a solid body representing the Standard Assessment Volume
-    HRESULT CreateStandardAssessmentVolume(const CATMathPoint& iCabinCenter, double iGroundZ, CATBody*& opSAVBody);
+    HRESULT CreateStandardAssessmentVolume(const CATMathPoint& iCabinCenter, double iGroundZ, int iStandard, CATBody*& opSAVBody);
 
     // 2. Cone Generation: Generate unobstructed sight cones starting from the eye points passing through the window boundaries
     HRESULT GenerateSightCones(const CATMathPoint& iEyePoint, const CATLISTV(CATISpecObject_var)& iGlazingSurfaces, CATBody*& opConeBody);
@@ -43,6 +43,9 @@ public:
 
     // 5. Measurement: Use CATDynMassProperties3D to calculate the final visible volume in cubic meters
     HRESULT MeasureVisibleVolume(CATBody* ipVisibleVolume, double& oVolumeM3);
+
+    // 6. Dynamic Eye Point Generation: Calculate left, mid, right eye points based on AHP, Seat Mid Point, and Length Offset
+    HRESULT GenerateEyePointsFromAHP(const CATMathPoint& iAHP, const CATMathPoint& iSeatMidPoint, double iLengthOffset, const CATMathVector& iForwardDir, const CATMathVector& iUpDir, CATMathPoint& oLeftEye, CATMathPoint& oMidEye, CATMathPoint& oRightEye);
 
 private:
     CATGeoFactory* _pGeoFactory;

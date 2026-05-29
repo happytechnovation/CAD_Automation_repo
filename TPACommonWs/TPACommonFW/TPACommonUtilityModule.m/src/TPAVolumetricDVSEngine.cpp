@@ -37,7 +37,7 @@ TPAVolumetricDVSEngine::~TPAVolumetricDVSEngine()
 //-----------------------------------------------------------------------------
 // 1. CreateStandardAssessmentVolume (SAV)
 //-----------------------------------------------------------------------------
-HRESULT TPAVolumetricDVSEngine::CreateStandardAssessmentVolume(const CATMathPoint& iCabinCenter, double iGroundZ, CATBody*& opSAVBody)
+HRESULT TPAVolumetricDVSEngine::CreateStandardAssessmentVolume(const CATMathPoint& iCabinCenter, double iGroundZ, int iStandard, CATBody*& opSAVBody)
 {
     HRESULT hr = E_FAIL;
     opSAVBody = NULL;
@@ -50,13 +50,49 @@ HRESULT TPAVolumetricDVSEngine::CreateStandardAssessmentVolume(const CATMathPoin
 
     CATTry
     {
-        // London DVS limits: 4.5m lateral offset, 2.0m forward offset, Z bounds from 1.0m to 2.5m off ground
         double xMin = iCabinCenter.GetX() - 4500.0;
         double xMax = iCabinCenter.GetX() + 4500.0;
         double yMin = iCabinCenter.GetY() - 2000.0;
         double yMax = iCabinCenter.GetY() + 2000.0;
         double zMin = iGroundZ + 1000.0;
         double zMax = iGroundZ + 2500.0;
+
+        if (iStandard == 0 || iStandard == 2) // London DVS (TfL) & UNECE R167
+        {
+            xMin = iCabinCenter.GetX() - 4500.0;
+            xMax = iCabinCenter.GetX() + 4500.0;
+            yMin = iCabinCenter.GetY() - 2000.0;
+            yMax = iCabinCenter.GetY() + 2000.0;
+            zMin = iGroundZ + 1000.0;
+            zMax = iGroundZ + 2500.0;
+        }
+        else if (iStandard == 1) // UNECE R125
+        {
+            xMin = iCabinCenter.GetX() - 2000.0;
+            xMax = iCabinCenter.GetX() + 2000.0;
+            yMin = iCabinCenter.GetY() - 4000.0;
+            yMax = iCabinCenter.GetY() + 4000.0;
+            zMin = iGroundZ + 500.0;
+            zMax = iGroundZ + 1700.0;
+        }
+        else if (iStandard == 3) // ISO 5006
+        {
+            xMin = iCabinCenter.GetX() - 12000.0;
+            xMax = iCabinCenter.GetX() + 12000.0;
+            yMin = iCabinCenter.GetY() - 12000.0;
+            yMax = iCabinCenter.GetY() + 12000.0;
+            zMin = iGroundZ;
+            zMax = iGroundZ + 1500.0;
+        }
+        else // Custom / Free
+        {
+            xMin = iCabinCenter.GetX() - 5000.0;
+            xMax = iCabinCenter.GetX() + 5000.0;
+            yMin = iCabinCenter.GetY() - 5000.0;
+            yMax = iCabinCenter.GetY() + 5000.0;
+            zMin = iGroundZ + 800.0;
+            zMax = iGroundZ + 3000.0;
+        }
 
         CATMathPoint ptMin(xMin, yMin, zMin);
         CATMathPoint ptMax(xMax, yMax, zMax);
@@ -70,7 +106,6 @@ HRESULT TPAVolumetricDVSEngine::CreateStandardAssessmentVolume(const CATMathPoin
     }
     CATCatch(CATError, pError)
     {
-        // Handle topological creation error
         if (NULL != opSAVBody)
         {
             _pGeoFactory->Remove(opSAVBody);
@@ -322,4 +357,41 @@ HRESULT TPAVolumetricDVSEngine::MeasureVisibleVolume(CATBody* ipVisibleVolume, d
     CATEndTry;
 
     return hr;
+}
+
+//-----------------------------------------------------------------------------
+// 6. GenerateEyePointsFromAHP
+//-----------------------------------------------------------------------------
+HRESULT TPAVolumetricDVSEngine::GenerateEyePointsFromAHP(const CATMathPoint& iAHP, const CATMathPoint& iSeatMidPoint, double iLengthOffset, const CATMathVector& iForwardDir, const CATMathVector& iUpDir, CATMathPoint& oLeftEye, CATMathPoint& oMidEye, CATMathPoint& oRightEye)
+{
+    CATMathVector fDir = iForwardDir;
+    fDir.Normalize();
+    CATMathVector uDir = iUpDir;
+    uDir.Normalize();
+    CATMathVector lDir = uDir ^ fDir; // Left lateral direction vector
+    lDir.Normalize();
+
+    // 1. Project AHP onto the seat centerline plane (passing through iSeatMidPoint with normal lDir)
+    double lateralOffset = (iAHP - iSeatMidPoint) * lDir;
+    CATMathPoint ahpProjected = iAHP - (lateralOffset * lDir);
+
+    // 2. Generate E2 (Mid Eye Point)
+    // Vertical offset: 1163.25 mm. Longitudinal offset: iLengthOffset rearward.
+    oMidEye = ahpProjected - (iLengthOffset * fDir) + (1163.25 * uDir);
+
+    // 3. Generate P-Point (Head Pivot Point): 98 mm rearward of E2
+    CATMathPoint pPoint = oMidEye - (98.0 * fDir);
+
+    // 4. Generate E1 (Left Eye Point) by rotating E2 60 degrees to the left about P-Point
+    double angleRad = 60.0 * 3.141592653589793 / 180.0;
+    double cosA = cos(angleRad);
+    double sinA = sin(angleRad);
+    CATMathVector vLeft = 98.0 * (cosA * fDir + sinA * lDir);
+    oLeftEye = pPoint + vLeft;
+
+    // 5. Generate E3 (Right Eye Point) by rotating E2 60 degrees to the right about P-Point
+    CATMathVector vRight = 98.0 * (cosA * fDir - sinA * lDir);
+    oRightEye = pPoint + vRight;
+
+    return S_OK;
 }

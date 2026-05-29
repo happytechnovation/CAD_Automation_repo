@@ -86,14 +86,28 @@ TPADVSDirectView3DDlg::TPADVSDirectView3DDlg() :
 //END CAA2 WIZARD CONSTRUCTOR INITIALIZATION SECTION
  _SliderAccuracy = NULL;
   _FrmVolumetric = NULL;
-  _LblLeftEye = NULL;
-  _EditorLeftEye = NULL;
-  _LblRightEye = NULL;
-  _EditorRightEye = NULL;
-  _LblGroundPlane = NULL;
-  _EditorGroundPlane = NULL;
   _LblComplianceStandard = NULL;
   _ComboStandard = NULL;
+  _LblGroundPlane = NULL;
+  _EditorGroundPlane = NULL;
+  _RadioButtGenFromAHP = NULL;
+  _RadioButtSelectDirectly = NULL;
+  _LblAccelKeyPt = NULL;
+  _EditorAccelKeyPt = NULL;
+  _LblSeatMidPt = NULL;
+  _EditorSeatMidPt = NULL;
+  _LblLengthOffset = NULL;
+  _SpinnerLengthOffset = NULL;
+  _LblLeftEye = NULL;
+  _EditorLeftEye = NULL;
+  _LblMidEye = NULL;
+  _EditorMidEye = NULL;
+  _LblRightEye = NULL;
+  _EditorRightEye = NULL;
+  _LblNeckPivot = NULL;
+  _SpinnerNeckPivot = NULL;
+  _LblHeadRotation = NULL;
+  _SpinnerHeadRotation = NULL;
 }
 
 //-------------------------------------------------------------------------
@@ -155,14 +169,28 @@ TPADVSDirectView3DDlg::~TPADVSDirectView3DDlg()
 //END CAA2 WIZARD DESTRUCTOR DECLARATION SECTION
  _SliderAccuracy = NULL;
   _FrmVolumetric = NULL;
-  _LblLeftEye = NULL;
-  _EditorLeftEye = NULL;
-  _LblRightEye = NULL;
-  _EditorRightEye = NULL;
-  _LblGroundPlane = NULL;
-  _EditorGroundPlane = NULL;
   _LblComplianceStandard = NULL;
   _ComboStandard = NULL;
+  _LblGroundPlane = NULL;
+  _EditorGroundPlane = NULL;
+  _RadioButtGenFromAHP = NULL;
+  _RadioButtSelectDirectly = NULL;
+  _LblAccelKeyPt = NULL;
+  _EditorAccelKeyPt = NULL;
+  _LblSeatMidPt = NULL;
+  _EditorSeatMidPt = NULL;
+  _LblLengthOffset = NULL;
+  _SpinnerLengthOffset = NULL;
+  _LblLeftEye = NULL;
+  _EditorLeftEye = NULL;
+  _LblMidEye = NULL;
+  _EditorMidEye = NULL;
+  _LblRightEye = NULL;
+  _EditorRightEye = NULL;
+  _LblNeckPivot = NULL;
+  _SpinnerNeckPivot = NULL;
+  _LblHeadRotation = NULL;
+  _SpinnerHeadRotation = NULL;
 }
 
 
@@ -303,31 +331,83 @@ _SliderAccuracy->SetDecimalPoint(2);
 _FrmVolumetric = new CATDlgFrame(this, "FrmVolumetric", CATDlgGridLayout);
 _FrmVolumetric->SetGridConstraints(3, 0, 1, 1, CATGRID_4SIDES);
 
-_LblLeftEye = new CATDlgLabel(_FrmVolumetric, "LblLeftEye");
-_LblLeftEye->SetGridConstraints(0, 0, 1, 1, CATGRID_4SIDES);
-_EditorLeftEye = new CATDlgEditor(_FrmVolumetric, "EditorLeftEye");
-_EditorLeftEye->SetGridConstraints(0, 1, 1, 1, CATGRID_4SIDES);
-_EditorLeftEye->SetReadOnly(TRUE);
-
-_LblRightEye = new CATDlgLabel(_FrmVolumetric, "LblRightEye");
-_LblRightEye->SetGridConstraints(1, 0, 1, 1, CATGRID_4SIDES);
-_EditorRightEye = new CATDlgEditor(_FrmVolumetric, "EditorRightEye");
-_EditorRightEye->SetGridConstraints(1, 1, 1, 1, CATGRID_4SIDES);
-_EditorRightEye->SetReadOnly(TRUE);
+_LblComplianceStandard = new CATDlgLabel(_FrmVolumetric, "LblComplianceStandard");
+_LblComplianceStandard->SetGridConstraints(0, 0, 1, 1, CATGRID_4SIDES);
+_ComboStandard = new CATDlgCombo(_FrmVolumetric, "ComboStandard", CATDlgCmbDropDown);
+_ComboStandard->SetGridConstraints(0, 1, 1, 1, CATGRID_4SIDES);
+_ComboStandard->SetLine("London DVS (TfL)", 0);
+_ComboStandard->SetLine("UNECE R125", 1);
+_ComboStandard->SetLine("UNECE R167", 2);
+_ComboStandard->SetLine("ISO 5006", 3);
+_ComboStandard->SetLine("Custom / Free", 4);
+_ComboStandard->SelectLine(0);
 
 _LblGroundPlane = new CATDlgLabel(_FrmVolumetric, "LblGroundPlane");
-_LblGroundPlane->SetGridConstraints(2, 0, 1, 1, CATGRID_4SIDES);
+_LblGroundPlane->SetGridConstraints(1, 0, 1, 1, CATGRID_4SIDES);
 _EditorGroundPlane = new CATDlgEditor(_FrmVolumetric, "EditorGroundPlane");
-_EditorGroundPlane->SetGridConstraints(2, 1, 1, 1, CATGRID_4SIDES);
+_EditorGroundPlane->SetGridConstraints(1, 1, 1, 1, CATGRID_4SIDES);
 _EditorGroundPlane->SetReadOnly(TRUE);
 
-_LblComplianceStandard = new CATDlgLabel(_FrmVolumetric, "LblComplianceStandard");
-_LblComplianceStandard->SetGridConstraints(3, 0, 1, 1, CATGRID_4SIDES);
-_ComboStandard = new CATDlgCombo(_FrmVolumetric, "ComboStandard", CATDlgCmbDropDown);
-_ComboStandard->SetGridConstraints(3, 1, 1, 1, CATGRID_4SIDES);
-_ComboStandard->SetLine("London DVS (TfL)", 0);
-_ComboStandard->SetLine("Custom / Free", 1);
-_ComboStandard->SelectLine(0);
+_RadioButtGenFromAHP = new CATDlgRadioButton(_FrmVolumetric, "RadioButtGenFromAHP");
+_RadioButtGenFromAHP->SetGridConstraints(2, 0, 1, 1, CATGRID_4SIDES);
+_RadioButtGenFromAHP->SetState(CATDlgCheck, TRUE);
+
+_RadioButtSelectDirectly = new CATDlgRadioButton(_FrmVolumetric, "RadioButtSelectDirectly");
+_RadioButtSelectDirectly->SetGridConstraints(2, 1, 1, 1, CATGRID_4SIDES);
+
+_LblAccelKeyPt = new CATDlgLabel(_FrmVolumetric, "LblAccelKeyPt");
+_LblAccelKeyPt->SetGridConstraints(3, 0, 1, 1, CATGRID_4SIDES);
+_EditorAccelKeyPt = new CATDlgEditor(_FrmVolumetric, "EditorAccelKeyPt");
+_EditorAccelKeyPt->SetGridConstraints(3, 1, 1, 1, CATGRID_4SIDES);
+_EditorAccelKeyPt->SetReadOnly(TRUE);
+
+_LblSeatMidPt = new CATDlgLabel(_FrmVolumetric, "LblSeatMidPt");
+_LblSeatMidPt->SetGridConstraints(4, 0, 1, 1, CATGRID_4SIDES);
+_EditorSeatMidPt = new CATDlgEditor(_FrmVolumetric, "EditorSeatMidPt");
+_EditorSeatMidPt->SetGridConstraints(4, 1, 1, 1, CATGRID_4SIDES);
+_EditorSeatMidPt->SetReadOnly(TRUE);
+
+_LblLengthOffset = new CATDlgLabel(_FrmVolumetric, "LblLengthOffset");
+_LblLengthOffset->SetGridConstraints(5, 0, 1, 1, CATGRID_4SIDES);
+_SpinnerLengthOffset = new CATDlgSpinner(_FrmVolumetric, "SpinnerLengthOffset", CATDlgSpnEntry|CATDlgSpnDouble);
+_SpinnerLengthOffset->SetMinMaxStep(0.000000, 2000.000000, 10.000000);
+_SpinnerLengthOffset->SetValue(678.0);
+_SpinnerLengthOffset->SetGridConstraints(5, 1, 1, 1, CATGRID_4SIDES);
+
+_LblLeftEye = new CATDlgLabel(_FrmVolumetric, "LblLeftEye");
+_LblLeftEye->SetGridConstraints(6, 0, 1, 1, CATGRID_4SIDES);
+_EditorLeftEye = new CATDlgEditor(_FrmVolumetric, "EditorLeftEye");
+_EditorLeftEye->SetGridConstraints(6, 1, 1, 1, CATGRID_4SIDES);
+_EditorLeftEye->SetReadOnly(TRUE);
+_EditorLeftEye->SetSensitivity(CATDlgDisable);
+
+_LblMidEye = new CATDlgLabel(_FrmVolumetric, "LblMidEye");
+_LblMidEye->SetGridConstraints(7, 0, 1, 1, CATGRID_4SIDES);
+_EditorMidEye = new CATDlgEditor(_FrmVolumetric, "EditorMidEye");
+_EditorMidEye->SetGridConstraints(7, 1, 1, 1, CATGRID_4SIDES);
+_EditorMidEye->SetReadOnly(TRUE);
+_EditorMidEye->SetSensitivity(CATDlgDisable);
+
+_LblRightEye = new CATDlgLabel(_FrmVolumetric, "LblRightEye");
+_LblRightEye->SetGridConstraints(8, 0, 1, 1, CATGRID_4SIDES);
+_EditorRightEye = new CATDlgEditor(_FrmVolumetric, "EditorRightEye");
+_EditorRightEye->SetGridConstraints(8, 1, 1, 1, CATGRID_4SIDES);
+_EditorRightEye->SetReadOnly(TRUE);
+_EditorRightEye->SetSensitivity(CATDlgDisable);
+
+_LblNeckPivot = new CATDlgLabel(_FrmVolumetric, "LblNeckPivot");
+_LblNeckPivot->SetGridConstraints(9, 0, 1, 1, CATGRID_4SIDES);
+_SpinnerNeckPivot = new CATDlgSpinner(_FrmVolumetric, "SpinnerNeckPivot", CATDlgSpnEntry|CATDlgSpnDouble);
+_SpinnerNeckPivot->SetMinMaxStep(0.000000, 500.000000, 5.000000);
+_SpinnerNeckPivot->SetValue(98.0);
+_SpinnerNeckPivot->SetGridConstraints(9, 1, 1, 1, CATGRID_4SIDES);
+
+_LblHeadRotation = new CATDlgLabel(_FrmVolumetric, "LblHeadRotation");
+_LblHeadRotation->SetGridConstraints(10, 0, 1, 1, CATGRID_4SIDES);
+_SpinnerHeadRotation = new CATDlgSpinner(_FrmVolumetric, "SpinnerHeadRotation", CATDlgSpnEntry|CATDlgSpnDouble);
+_SpinnerHeadRotation->SetMinMaxStep(0.000000, 180.000000, 5.000000);
+_SpinnerHeadRotation->SetValue(60.0);
+_SpinnerHeadRotation->SetGridConstraints(10, 1, 1, 1, CATGRID_4SIDES);
 
 _FrmDefinition->SetSensitivity(CATDlgDisable);
 _FrmTargetSurface->SetSensitivity(CATDlgDisable);

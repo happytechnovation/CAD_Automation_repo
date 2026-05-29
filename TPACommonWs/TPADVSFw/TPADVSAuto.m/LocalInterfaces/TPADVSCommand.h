@@ -78,8 +78,9 @@ class TPADVSCommand: public CATStateCommand
   virtual CATBoolean ActionOnVechGeomMultiListRemove();
   virtual CATBoolean ActionOnVehicleGeomMultiList();
 
-  public:
 	  virtual CATBoolean ActionOnComputeVolumetricDVS();
+	  virtual CATBoolean ActionOnRadioGenFromAHP();
+	  virtual CATBoolean ActionOnRadioSelectDirectly();
 
   private:
 	  TPACommonUtilityClass *_pTPACommonUtiliy;
@@ -92,9 +93,12 @@ class TPADVSCommand: public CATStateCommand
 	  CATHSO				*_pHSO;
 	  CATPSO				*_pPSO;
 
-	  CATISpecObject_var    _spLeftEyePoint;
-	  CATISpecObject_var    _spRightEyePoint;
 	  CATISpecObject_var    _spGroundPlane;
+	  CATISpecObject_var    _spAccelKeyPt;
+	  CATISpecObject_var    _spSeatMidPt;
+	  CATISpecObject_var    _spLeftEyePoint;
+	  CATISpecObject_var    _spMidEyePoint;
+	  CATISpecObject_var    _spRightEyePoint;
 	  CATLISTV(CATISpecObject_var) _ListOfObstacleBodies;
 	  CATLISTP(CATBody)     _transientCGMBodies;
 };
